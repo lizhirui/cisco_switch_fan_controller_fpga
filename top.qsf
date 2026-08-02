@@ -1,0 +1,205 @@
+# -------------------------------------------------------------------------- #
+#
+# Copyright (C) 1991-2013 Altera Corporation
+# Your use of Altera Corporation's design tools, logic functions 
+# and other software and tools, and its AMPP partner logic 
+# functions, and any output files from any of the foregoing 
+# (including device programming or simulation files), and any 
+# associated documentation or information are expressly subject 
+# to the terms and conditions of the Altera Program License 
+# Subscription Agreement, Altera MegaCore Function License 
+# Agreement, or other applicable license agreement, including, 
+# without limitation, that your use is for the sole purpose of 
+# programming logic devices manufactured by Altera and sold by 
+# Altera or its authorized distributors.  Please refer to the 
+# applicable agreement for further details.
+#
+# -------------------------------------------------------------------------- #
+#
+# Quartus II 64-Bit
+# Version 13.0.0 Build 156 04/24/2013 SJ Full Version
+# Date created = 23:45:40  July 30, 2026
+#
+# -------------------------------------------------------------------------- #
+#
+# Notes:
+#
+# 1) The default values for assignments are stored in the file:
+#		top_assignment_defaults.qdf
+#    If this file doesn't exist, see file:
+#		assignment_defaults.qdf
+#
+# 2) Altera recommends that you do not modify this file. This
+#    file is updated automatically by the Quartus II software
+#    and any changes you make may be lost or overwritten.
+#
+# -------------------------------------------------------------------------- #
+
+
+set_global_assignment -name FAMILY "Cyclone IV E"
+set_global_assignment -name DEVICE EP4CE6E22C8
+set_global_assignment -name TOP_LEVEL_ENTITY top
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION 13.0
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "23:45:40  JULY 30, 2026"
+set_global_assignment -name LAST_QUARTUS_VERSION 13.0
+set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name DEVICE_FILTER_PACKAGE "ANY QFP"
+set_global_assignment -name DEVICE_FILTER_PIN_COUNT 144
+set_global_assignment -name ERROR_CHECK_FREQUENCY_DIVISOR 1
+set_global_assignment -name NOMINAL_CORE_SUPPLY_VOLTAGE 1.2V
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "2.5 V"
+set_location_assignment PIN_24 -to clk
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to clk
+set_location_assignment PIN_38 -to cisco_fan1234_pwm
+set_location_assignment PIN_39 -to cisco_fan5678_pwm
+set_location_assignment PIN_53 -to cisco_fan_fb[7]
+set_location_assignment PIN_52 -to cisco_fan_fb[6]
+set_location_assignment PIN_51 -to cisco_fan_fb[5]
+set_location_assignment PIN_50 -to cisco_fan_fb[4]
+set_location_assignment PIN_49 -to cisco_fan_fb[3]
+set_location_assignment PIN_46 -to cisco_fan_fb[2]
+set_location_assignment PIN_44 -to cisco_fan_fb[1]
+set_location_assignment PIN_43 -to cisco_fan_fb[0]
+set_location_assignment PIN_42 -to cisco_led_status_green
+set_location_assignment PIN_31 -to cisco_led_status_red
+set_location_assignment PIN_77 -to eeprom_addr[2]
+set_location_assignment PIN_76 -to eeprom_addr[1]
+set_location_assignment PIN_75 -to eeprom_addr[0]
+set_location_assignment PIN_83 -to eeprom_scl
+set_location_assignment PIN_80 -to eeprom_sda
+set_location_assignment PIN_84 -to eeprom_wp
+set_location_assignment PIN_143 -to key_add
+set_location_assignment PIN_124 -to key_lcd_openclose
+set_location_assignment PIN_111 -to key_load
+set_location_assignment PIN_113 -to key_page_next
+set_location_assignment PIN_112 -to key_page_prev
+set_location_assignment PIN_110 -to key_save
+set_location_assignment PIN_144 -to key_sub
+set_location_assignment PIN_128 -to lcd_cs
+set_location_assignment PIN_142 -to lcd_leda_pwm
+set_location_assignment PIN_137 -to lcd_rom_cs
+set_location_assignment PIN_136 -to lcd_rom_sck
+set_location_assignment PIN_138 -to lcd_rom_si
+set_location_assignment PIN_141 -to lcd_rom_so
+set_location_assignment PIN_132 -to lcd_rs
+set_location_assignment PIN_129 -to lcd_rst
+set_location_assignment PIN_133 -to lcd_sclk
+set_location_assignment PIN_135 -to lcd_sda
+set_location_assignment PIN_74 -to main_fan_fb[7]
+set_location_assignment PIN_73 -to main_fan_fb[6]
+set_location_assignment PIN_72 -to main_fan_fb[5]
+set_location_assignment PIN_71 -to main_fan_fb[4]
+set_location_assignment PIN_70 -to main_fan_fb[3]
+set_location_assignment PIN_69 -to main_fan_fb[2]
+set_location_assignment PIN_68 -to main_fan_fb[1]
+set_location_assignment PIN_67 -to main_fan_fb[0]
+set_location_assignment PIN_66 -to main_fan_pwm[7]
+set_location_assignment PIN_65 -to main_fan_pwm[6]
+set_location_assignment PIN_64 -to main_fan_pwm[5]
+set_location_assignment PIN_60 -to main_fan_pwm[4]
+set_location_assignment PIN_59 -to main_fan_pwm[3]
+set_location_assignment PIN_58 -to main_fan_pwm[2]
+set_location_assignment PIN_55 -to main_fan_pwm[1]
+set_location_assignment PIN_54 -to main_fan_pwm[0]
+set_location_assignment PIN_28 -to rst_n
+set_location_assignment PIN_121 -to key_bright_down
+set_location_assignment PIN_120 -to key_bright_up
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to cisco_fan1234_pwm
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to cisco_fan5678_pwm
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to cisco_fan_fb[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to cisco_fan_fb[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to cisco_fan_fb[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to cisco_fan_fb[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to cisco_fan_fb[4]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to cisco_fan_fb[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to cisco_fan_fb[6]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to cisco_fan_fb[7]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to cisco_led_status_green
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to cisco_led_status_red
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to eeprom_addr[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to eeprom_addr[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to eeprom_addr[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to eeprom_scl
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to eeprom_sda
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to eeprom_wp
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to key_add
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to key_bright_down
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to key_bright_up
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to key_lcd_openclose
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to key_load
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to key_page_next
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to key_page_prev
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to key_save
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to key_sub
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to lcd_cs
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to lcd_leda_pwm
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to lcd_rom_cs
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to lcd_rom_sck
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to lcd_rom_si
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to lcd_rom_so
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to lcd_rs
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to lcd_sclk
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to lcd_rst
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to main_fan_fb[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to lcd_sda
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to main_fan_fb[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to rst_n
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to main_fan_pwm[7]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to main_fan_pwm[6]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to main_fan_pwm[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to main_fan_pwm[4]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to main_fan_pwm[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to main_fan_pwm[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to main_fan_pwm[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to main_fan_pwm[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to main_fan_fb[7]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to main_fan_fb[6]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to main_fan_fb[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to main_fan_fb[4]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to main_fan_fb[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to main_fan_fb[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to uart_rxd
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to uart_txd
+set_location_assignment PIN_33 -to uart_txd
+set_location_assignment PIN_32 -to uart_rxd
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/lcd_ui_draw_writer.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/true_dual_port_ram.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/lcd_font_stream_pkg.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/lcd_ui_renderer.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/lcd_ui_config_processor.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/lcd_ui_config_decoder.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/lcd_page_main_ui.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/lcd_ui_config_pkg.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/vram_write_controller_writer.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/lcd_rom_reader.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/lcd_rom_font_addr_generator.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/lcd_page_main.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/lcd_char_line_processor.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/poweron_reset_generator.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/vram_write_controller.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/single_port_ram.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/simple_dual_port_ram.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/lcd_vram_reader.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/lcd_scanout_controller.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/lcd_reset_command_rom.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/lcd_phy.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/lcd_data_transposer.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/lcd_command_generator.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/lcd_bright_controller.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/fwft_fifo.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/double_buffered_vram.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/signal_syncer.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/lcd_controller.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/key_handler.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/key_controller.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/clock_enable_generator.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/top.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/reset_synchronizer.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/pwm_generator.sv
+set_global_assignment -name SDC_FILE top.sdc
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
