@@ -27,22 +27,18 @@ module lcd_page_main_ui #(
         else begin
             case(config_addr)
                 'd0: begin
-                    config_data <= make_clear_config(LCD_UI_COLOR_BLACK);
+                    config_data <= make_clear_config(LCD_UI_COLOR_WHITE);
                 end
 
                 'd1: begin
-                    config_data <= make_draw_text_config(lcd_ui_x_t'('d3), lcd_ui_y_t'('d2), LCD_UI_COLOR_WHITE, TEXT_0);
+                    config_data <= make_fill_rect_config(lcd_ui_x_t'('d120), lcd_ui_y_t'('d58), lcd_ui_size_t'('d30), lcd_ui_size_t'('d20), LCD_UI_COLOR_BLACK);
                 end
 
                 'd2: begin
-                    config_data <= make_empty_config(LCD_UI_CONFIG_TYPE_NOP);
+                    config_data <= make_draw_text_config(lcd_ui_x_t'('d17), lcd_ui_y_t'('d22), LCD_UI_COLOR_WHITE, TEXT_1);
                 end
 
                 'd3: begin
-                    config_data <= make_draw_text_config(lcd_ui_x_t'('d13), lcd_ui_y_t'('d25), LCD_UI_COLOR_BLACK, TEXT_1);
-                end
-
-                'd4: begin
                     config_data <= make_empty_config(LCD_UI_CONFIG_TYPE_FRAME_END);
                 end
 
