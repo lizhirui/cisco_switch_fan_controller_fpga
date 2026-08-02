@@ -47,21 +47,25 @@ module lcd_ui_renderer #(
     localparam STATE_DRAW_TEXT_SEND_REQ_TO_ROM_READER = STATE_WIDTH'('d4);
     localparam STATE_DRAW_TEXT_WAIT_ROM_READER_OK = STATE_WIDTH'('d5);
     
-    localparam STATE_FILL_RECT_WAIT_RENDER_PIPELINE_IDLE = STATE_WIDTH'('d6);
-    localparam STATE_FILL_RECT_START = STATE_WIDTH'('d7);
-    localparam STATE_FILL_RECT_WAIT = STATE_WIDTH'('d8);
+    localparam STATE_DRAW_BITMAP_WAIT_RENDER_PIPELINE_IDLE = STATE_WIDTH'('d6);
+    localparam STATE_DRAW_BITMAP_START = STATE_WIDTH'('d7);
+    localparam STATE_DRAW_BITMAP_WAIT = STATE_WIDTH'('d8);
     
-    localparam STATE_DRAW_LINE_WAIT_RENDER_PIPELINE_IDLE = STATE_WIDTH'('d9);
-    localparam STATE_DRAW_LINE_START = STATE_WIDTH'('d10);
-    localparam STATE_DRAW_LINE_WAIT = STATE_WIDTH'('d11);
+    localparam STATE_FILL_RECT_WAIT_RENDER_PIPELINE_IDLE = STATE_WIDTH'('d9);
+    localparam STATE_FILL_RECT_START = STATE_WIDTH'('d10);
+    localparam STATE_FILL_RECT_WAIT = STATE_WIDTH'('d11);
     
-    localparam STATE_CLEAR_WAIT_RENDER_PIPELINE_IDLE = STATE_WIDTH'('d12);
-    localparam STATE_CLEAR_START = STATE_WIDTH'('d13);
-    localparam STATE_CLEAR_WAIT = STATE_WIDTH'('d14);
+    localparam STATE_DRAW_LINE_WAIT_RENDER_PIPELINE_IDLE = STATE_WIDTH'('d12);
+    localparam STATE_DRAW_LINE_START = STATE_WIDTH'('d13);
+    localparam STATE_DRAW_LINE_WAIT = STATE_WIDTH'('d14);
     
-    localparam STATE_FRAME_END_WAIT_RENDER_PIPELINE_IDLE = STATE_WIDTH'('d15);
-    localparam STATE_FRAME_END_FRAME_SUBMIT = STATE_WIDTH'('d16);
-    localparam STATE_FRAME_END_WAIT_FRAME_SUBMIT_OK = STATE_WIDTH'('d17);
+    localparam STATE_CLEAR_WAIT_RENDER_PIPELINE_IDLE = STATE_WIDTH'('d15);
+    localparam STATE_CLEAR_START = STATE_WIDTH'('d16);
+    localparam STATE_CLEAR_WAIT = STATE_WIDTH'('d17);
+    
+    localparam STATE_FRAME_END_WAIT_RENDER_PIPELINE_IDLE = STATE_WIDTH'('d18);
+    localparam STATE_FRAME_END_FRAME_SUBMIT = STATE_WIDTH'('d19);
+    localparam STATE_FRAME_END_WAIT_FRAME_SUBMIT_OK = STATE_WIDTH'('d20);
     
     logic[STATE_WIDTH - 1:0] cur_state;
     logic[STATE_WIDTH - 1:0] next_state;
@@ -69,6 +73,7 @@ module lcd_ui_renderer #(
     lcd_ui_config_type_t decoded_config_type;
     logic decoded_config_nop;
     logic decoded_config_draw_text;
+    logic decoded_config_draw_bitmap;
     logic decoded_config_fill_rect;
     logic decoded_config_draw_line;
     logic decoded_config_clear;
@@ -116,6 +121,9 @@ module lcd_ui_renderer #(
                     else if(decoded_config_draw_text) begin
                         next_state = STATE_DRAW_TEXT_CHECK;
                     end
+                    else if(decoded_config_draw_bitmap) begin
+                        next_state = STATE_DRAW_BITMAP_WAIT_RENDER_PIPELINE_IDLE;
+                    end
                     else if(decoded_config_fill_rect) begin
                         next_state = STATE_FILL_RECT_WAIT_RENDER_PIPELINE_IDLE;
                     end
@@ -160,6 +168,22 @@ module lcd_ui_renderer #(
                     else begin
                         next_state = STATE_DRAW_TEXT_CHECK;
                     end
+                end
+            end
+            
+            STATE_DRAW_BITMAP_WAIT_RENDER_PIPELINE_IDLE: begin
+                if(render_pipeline_idle) begin
+                    next_state = STATE_DRAW_BITMAP_START;
+                end
+            end
+            
+            STATE_DRAW_BITMAP_START: begin
+                next_state = STATE_DRAW_BITMAP_WAIT;
+            end
+            
+            STATE_DRAW_BITMAP_WAIT: begin
+                if(!draw_writer_busy) begin
+                    next_state = STATE_WAIT_CONFIG;
                 end
             end
             
@@ -288,7 +312,7 @@ module lcd_ui_renderer #(
         if(rst) begin
             draw_writer_start <= 1'b0;
         end
-        else if((next_state == STATE_FILL_RECT_START) || (next_state == STATE_DRAW_LINE_START) || (next_state == STATE_CLEAR_START)) begin
+        else if((next_state == STATE_DRAW_BITMAP_START) || (next_state == STATE_FILL_RECT_START) || (next_state == STATE_DRAW_LINE_START) || (next_state == STATE_CLEAR_START)) begin
             draw_writer_start <= 1'b1;
         end
         else begin
@@ -365,6 +389,7 @@ module lcd_ui_renderer #(
         .config_type(decoded_config_type),
         .config_nop(decoded_config_nop),
         .config_draw_text(decoded_config_draw_text),
+        .config_draw_bitmap(decoded_config_draw_bitmap),
         .config_fill_rect(decoded_config_fill_rect),
         .config_draw_line(decoded_config_draw_line),
         .config_clear(decoded_config_clear),
@@ -387,5 +412,5 @@ module lcd_ui_renderer #(
         .char_inc2(char_inc2)
     );
     
-    assign draw_writer_config_load = ((cur_state == STATE_WAIT_CONFIG) && ((next_state == STATE_FILL_RECT_WAIT_RENDER_PIPELINE_IDLE) || (next_state == STATE_DRAW_LINE_WAIT_RENDER_PIPELINE_IDLE) || (next_state == STATE_CLEAR_WAIT_RENDER_PIPELINE_IDLE))) ? 1'b1 : 1'b0;
+    assign draw_writer_config_load = ((cur_state == STATE_WAIT_CONFIG) && ((next_state == STATE_DRAW_BITMAP_WAIT_RENDER_PIPELINE_IDLE) || (next_state == STATE_FILL_RECT_WAIT_RENDER_PIPELINE_IDLE) || (next_state == STATE_DRAW_LINE_WAIT_RENDER_PIPELINE_IDLE) || (next_state == STATE_CLEAR_WAIT_RENDER_PIPELINE_IDLE))) ? 1'b1 : 1'b0;
 endmodule

@@ -1,6 +1,7 @@
 `default_nettype none
 
 import lcd_ui_config_pkg::*;
+import lcd_ui_bitmap_pkg::*;
 
 module lcd_page_main_ui #(
         parameter CONFIG_ADDR_WIDTH = 4
@@ -31,18 +32,10 @@ module lcd_page_main_ui #(
                 end
 
                 'd1: begin
-                    config_data <= make_draw_line_config(lcd_ui_x_t'('d110), lcd_ui_y_t'('d50), lcd_ui_x_t'('d10), lcd_ui_y_t'('d5), LCD_UI_COLOR_BLACK);
+                    config_data <= make_draw_bitmap_config(lcd_ui_x_t'('d121), lcd_ui_y_t'('d57), LCD_UI_BITMAP_ID_TEST_X_BOX, LCD_UI_COLOR_BLACK);
                 end
 
                 'd2: begin
-                    config_data <= make_draw_line_config(lcd_ui_x_t'('d64), lcd_ui_y_t'('d32), lcd_ui_x_t'('d64), lcd_ui_y_t'('d32), LCD_UI_COLOR_BLACK);
-                end
-
-                'd3: begin
-                    config_data <= make_draw_line_config(lcd_ui_x_t'('d200), lcd_ui_y_t'('d10), lcd_ui_x_t'('d10), lcd_ui_y_t'('d50), LCD_UI_COLOR_BLACK);
-                end
-
-                'd4: begin
                     config_data <= make_empty_config(LCD_UI_CONFIG_TYPE_FRAME_END);
                 end
 

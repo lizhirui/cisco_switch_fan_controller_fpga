@@ -7,6 +7,7 @@ module lcd_ui_config_decoder(
         output lcd_ui_config_type_t config_type,
         output logic config_nop,
         output logic config_draw_text,
+        output logic config_draw_bitmap,
         output logic config_fill_rect,
         output logic config_draw_line,
         output logic config_clear,
@@ -26,6 +27,7 @@ module lcd_ui_config_decoder(
     always_comb begin
         config_nop = 1'b0;
         config_draw_text = 1'b0;
+        config_draw_bitmap = 1'b0;
         config_fill_rect = 1'b0;
         config_draw_line = 1'b0;
         config_clear = 1'b0;
@@ -49,8 +51,8 @@ module lcd_ui_config_decoder(
                 draw_text_text = draw_text_config.text;
             end
             
-            LCD_UI_CONFIG_TYPE_BITMAP: begin
-                config_error = 1'b1;
+            LCD_UI_CONFIG_TYPE_DRAW_BITMAP: begin
+                config_draw_bitmap = 1'b1;
             end
             
             LCD_UI_CONFIG_TYPE_FILL_RECT: begin

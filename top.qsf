@@ -167,6 +167,9 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to uart_rxd
 set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to uart_txd
 set_location_assignment PIN_33 -to uart_txd
 set_location_assignment PIN_32 -to uart_rxd
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/lcd_ui_bitmap_pkg.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/lcd_ui_bitmap_info_rom.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/lcd_ui_bitmap_data_rom.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/lcd_ui_draw_writer.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/true_dual_port_ram.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/lcd_font_stream_pkg.sv
