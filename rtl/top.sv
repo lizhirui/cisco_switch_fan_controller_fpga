@@ -44,8 +44,8 @@ module top(
     localparam LCD_PIXEL_LINE_NUM = 64;
     localparam LCD_PIXEL_COL_NUM = 128;
     localparam LCD_DATA_WIDTH = 8;
-    localparam CHAR_HEIGHT = 16;
     localparam CHAR_WIDTH = 8;
+    localparam CHAR_HEIGHT = 16;
     localparam LCD_LINE_NUM = LCD_PIXEL_LINE_NUM / CHAR_HEIGHT;
     localparam LCD_COL_NUM = LCD_PIXEL_COL_NUM / CHAR_WIDTH;
     localparam PAGE_ID_WIDTH = 2;
@@ -114,8 +114,8 @@ module top(
         .LCD_PIXEL_LINE_NUM(LCD_PIXEL_LINE_NUM),
         .LCD_PIXEL_COL_NUM(LCD_PIXEL_COL_NUM),
         .LCD_DATA_WIDTH(LCD_DATA_WIDTH),
-        .CHAR_HEIGHT(CHAR_HEIGHT),
         .CHAR_WIDTH(CHAR_WIDTH),
+        .CHAR_HEIGHT(CHAR_HEIGHT),
         .PAGE_ID_WIDTH(PAGE_ID_WIDTH),
         .CONFIG_ADDR_WIDTH(CONFIG_ADDR_WIDTH)
     )lcd_controller_inst(
@@ -145,7 +145,11 @@ module top(
     );
 
     lcd_page_main_ui #(
-        .CONFIG_ADDR_WIDTH(CONFIG_ADDR_WIDTH)
+        .CONFIG_ADDR_WIDTH(CONFIG_ADDR_WIDTH),
+        .LCD_PIXEL_LINE_NUM(LCD_PIXEL_LINE_NUM),
+        .LCD_PIXEL_COL_NUM(LCD_PIXEL_COL_NUM),
+        .CHAR_WIDTH(CHAR_WIDTH),
+        .CHAR_HEIGHT(CHAR_HEIGHT)
     )lcd_page_main_inst(
         .clk(clk),
         .rst(rst),
@@ -154,4 +158,21 @@ module top(
     );
     
     assign page_config_data = page_main_config_data;
+    
+    uart #(
+        .CLOCK_FREQUENCY(CLK_FREQ),
+        .BAUD_RATE(115200),
+        .DATA_WIDTH(8)
+    )uart_inst(
+        .clk(clk),
+        .rst(rst),
+        .rxd(uart_rxd),
+        .rx_data(),
+        .rx_data_valid(),
+        .rx_error(),
+        .txd(uart_txd),
+        .tx_data('hac),
+        .tx_start(1'b1),
+        .tx_busy()
+    );
 endmodule
