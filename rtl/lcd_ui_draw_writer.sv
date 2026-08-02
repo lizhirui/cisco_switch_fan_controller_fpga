@@ -85,7 +85,6 @@ module lcd_ui_draw_writer #(
     logic[VRAM_BYTE_COL_WIDTH - 1:0] fill_rect_last_byte;
     logic[VRAM_DATA_OFFSET_WIDTH - 1:0] fill_rect_start_offset;
     logic[VRAM_DATA_OFFSET_WIDTH - 1:0] fill_rect_end_offset;
-    lcd_ui_y_t fill_rect_first_y;
     lcd_ui_y_t fill_rect_last_y;
     
     logic[VRAM_BYTE_COL_WIDTH - 1:0] fill_rect_byte;
@@ -262,7 +261,7 @@ module lcd_ui_draw_writer #(
         else if((cur_state == STATE_IDLE) && (next_state != STATE_IDLE)) begin
             busy <= 1'b1;
         end
-        else if((cur_state == STATE_IDLE) && (next_state == STATE_IDLE)) begin
+        else if((cur_state != STATE_IDLE) && (next_state == STATE_IDLE)) begin
             busy <= 1'b0;
         end
     end
@@ -308,7 +307,6 @@ module lcd_ui_draw_writer #(
             fill_rect_last_byte <= '0;
             fill_rect_start_offset <= '0;
             fill_rect_end_offset <= '0;
-            fill_rect_first_y <= '0;
             fill_rect_last_y <= '0;
         end
         else if(cur_state == STATE_FILL_RECT_INIT) begin
@@ -317,7 +315,6 @@ module lcd_ui_draw_writer #(
             fill_rect_last_byte <= fill_rect_last_byte_cal;
             fill_rect_start_offset <= fill_rect_start_offset_cal;
             fill_rect_end_offset <= fill_rect_end_offset_cal;
-            fill_rect_first_y <= fill_rect_config_loaded.y;
             fill_rect_last_y <= fill_rect_y_last_cal[LCD_UI_Y_WIDTH - 1:0];
         end
     end
@@ -453,4 +450,6 @@ module lcd_ui_draw_writer #(
             clear_addr <= clear_addr + 'b1;
         end
     end
+    
+    assign clear_wdata = {VRAM_DATA_WIDTH{clear_config_loaded.color}};
 endmodule

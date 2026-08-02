@@ -53,7 +53,7 @@ module lcd_ui_renderer #(
     
     localparam STATE_DRAW_LINE_WAIT_RENDER_PIPELINE_IDLE = STATE_WIDTH'('d9);
     localparam STATE_DRAW_LINE_START = STATE_WIDTH'('d10);
-    localparam STATE_DRAW_LINE_WAIT = STATE_WIDTH'('d1);
+    localparam STATE_DRAW_LINE_WAIT = STATE_WIDTH'('d11);
     
     localparam STATE_CLEAR_WAIT_RENDER_PIPELINE_IDLE = STATE_WIDTH'('d12);
     localparam STATE_CLEAR_START = STATE_WIDTH'('d13);
@@ -113,7 +113,7 @@ module lcd_ui_renderer #(
                     if(decoded_config_nop) begin
                         next_state = STATE_NOP;
                     end
-                    if(decoded_config_draw_text) begin
+                    else if(decoded_config_draw_text) begin
                         next_state = STATE_DRAW_TEXT_CHECK;
                     end
                     else if(decoded_config_fill_rect) begin
