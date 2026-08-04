@@ -167,7 +167,7 @@ module lcd_rom_reader #(
             data <= '0;
         end
         else if((cur_state == STATE_READ_DATA) && clken) begin
-            data[recv_bit_cnt] <= lcd_rom_so;
+            data <= {data[DATA_WIDTH - 2:0], lcd_rom_so};
         end
     end
 

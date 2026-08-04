@@ -14,7 +14,9 @@ module lcd_controller #(
         parameter LCD_LINE_NUM = LCD_PIXEL_LINE_NUM / CHAR_HEIGHT,
         parameter LCD_COL_NUM = LCD_PIXEL_COL_NUM / CHAR_WIDTH,
         parameter PAGE_ID_WIDTH = 2,
-        parameter CONFIG_ADDR_WIDTH = 4
+        parameter CONFIG_ADDR_WIDTH = 4,
+        parameter VRAM_DEPTH = LCD_PIXEL_LINE_NUM * LCD_PIXEL_COL_NUM / LCD_DATA_WIDTH,
+        parameter VRAM_ADDR_WIDTH = (VRAM_DEPTH <= 1) ? 1 : $clog2(VRAM_DEPTH)
     )(
         input logic clk,
         input logic rst,
@@ -44,12 +46,15 @@ module lcd_controller #(
 
         output logic[PAGE_ID_WIDTH - 1:0] page_id,
         output logic[CONFIG_ADDR_WIDTH - 1:0] page_config_addr,
-        input lcd_ui_config_data_t page_config_data
+        input lcd_ui_config_data_t page_config_data,
+        
+        input logic[VRAM_ADDR_WIDTH - 1:0] clone_vram_raddr,
+        output logic[LCD_DATA_WIDTH - 1:0] clone_vram_rdata,
+        input logic clone_vram_start,
+        output logic clone_vram_busy
     );
     
     localparam ROM_ADDR_WIDTH = 24;
-    localparam VRAM_DEPTH = LCD_PIXEL_LINE_NUM * LCD_PIXEL_COL_NUM / LCD_DATA_WIDTH;
-    localparam VRAM_ADDR_WIDTH = (VRAM_DEPTH <= 1) ? 1 : $clog2(VRAM_DEPTH);
     
     logic ui_config_start;
     logic ui_config_busy;
@@ -137,6 +142,9 @@ module lcd_controller #(
         .rst(rst),
         .start(1'b1),
         .busy(),
+        .page_id_in(page_id_in),
+        .page_id_in_valid(page_id_in_valid),
+        .page_id(page_id),
         .page_config_addr(page_config_addr),
         .page_config_data(page_config_data),
         .config_start(ui_config_start),
@@ -171,7 +179,7 @@ module lcd_controller #(
 
     lcd_rom_reader #(
         .CLK_FREQ(CLK_FREQ),
-        .FREQ_DIVIDE(2),
+        .FREQ_DIVIDE(1),
         .ADDR_WIDTH(ROM_ADDR_WIDTH),
         .DATA_WIDTH(LCD_FONT_DATA_WIDTH),
         .LEN_WIDTH(LCD_FONT_DATA_LEN_WIDTH)
@@ -328,7 +336,11 @@ module lcd_controller #(
         .submitting(vram_submitting),
         .raddr(vram_raddr),
         .rdata(vram_rdata),
-        .switch(vram_switch)
+        .switch(vram_switch),
+        .clone_vram_raddr(clone_vram_raddr),
+        .clone_vram_rdata(clone_vram_rdata),
+        .clone_vram_start(clone_vram_start),
+        .clone_vram_busy(clone_vram_busy)
     );
 
     lcd_scanout_controller #(

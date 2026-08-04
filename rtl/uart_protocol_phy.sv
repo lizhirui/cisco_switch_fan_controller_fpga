@@ -22,7 +22,7 @@ module uart_protocol_phy #(
         
         input logic[SEND_PACKET_BYTE_LENGTH * 8 - 1:0] send_packet,
         input logic send_packet_valid,
-        output logic send_packet_busy
+        output logic send_packet_pop
     );
     
     localparam RECV_CNT_WIDTH = (RECV_PACKET_BYTE_LENGTH <= 1) ? 1 : $clog2(RECV_PACKET_BYTE_LENGTH);
@@ -301,13 +301,13 @@ module uart_protocol_phy #(
     
     always_ff @(posedge clk) begin
         if(rst) begin
-            send_packet_busy <= 1'b0;
+            send_packet_pop <= 1'b0;
         end
         else if((cur_send_state == SEND_STATE_IDLE) && (cur_send_state != next_send_state)) begin
-            send_packet_busy <= 1'b1;
+            send_packet_pop <= 1'b1;
         end
-        else if((cur_send_state != next_send_state) && (next_send_state == SEND_STATE_IDLE)) begin
-            send_packet_busy <= 1'b0;
+        else begin
+            send_packet_pop <= 1'b0;
         end
     end
     

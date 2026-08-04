@@ -38,3 +38,33 @@ derive_clock_uncertainty
 
 # tpd constraints
 
+set_false_path -from [get_ports {rst_n}]
+set_false_path -from [get_ports {uart_rxd}]
+set_false_path -from [get_ports {key_*}]
+set_false_path -from [get_ports {cisco_fan_fb[*]}]
+set_false_path -from [get_ports {main_fan_fb[*]}]
+set_false_path -from [get_ports {lcd_rom_so}]
+set_false_path -from [get_ports {eeprom_sda}]
+
+set_false_path -to [get_ports {uart_txd}]
+set_false_path -to [get_ports {cisco_fan1234_pwm}]
+set_false_path -to [get_ports {cisco_fan5678_pwm}]
+set_false_path -to [get_ports {main_fan_pwm}]
+set_false_path -to [get_ports {cisco_led_status_green}]
+set_false_path -to [get_ports {cisco_led_status_red}]
+set_false_path -to [get_ports {eeprom_wp}]
+
+set_false_path -to [get_ports {eeprom_addr[*]}]
+set_false_path -to [get_ports {eeprom_scl}]
+set_false_path -to [get_ports {eeprom_sda}]
+set_false_path -to [get_ports {eeprom_wp}]
+
+set_false_path -to [get_ports {lcd_cs}]
+set_false_path -to [get_ports {lcd_leda_pwm}]
+set_false_path -to [get_ports {lcd_rom_cs}]
+set_false_path -to [get_ports {lcd_rom_sck}]
+set_false_path -to [get_ports {lcd_rom_si}]
+set_false_path -to [get_ports {lcd_rs}]
+set_false_path -to [get_ports {lcd_rst}]
+set_false_path -to [get_ports {lcd_sclk}]
+set_false_path -to [get_ports {lcd_sda}]
