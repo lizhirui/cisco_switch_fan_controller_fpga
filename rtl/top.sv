@@ -310,6 +310,17 @@ module top(
         .clone_vram_busy(clone_vram_busy)
     );
 
+    page_manager #(
+        .PAGE_ID_WIDTH(PAGE_ID_WIDTH),
+        .CONFIG_ADDR_WIDTH(CONFIG_ADDR_WIDTH)
+    )page_manager_inst(
+        .page_id(page_id),
+        .page_config_addr(page_config_addr),
+        .page_config_data(page_config_data),
+        .page_main_config_addr(page_main_config_addr),
+        .page_main_config_data(page_main_config_data)
+    );
+
     lcd_page_main_ui #(
         .CONFIG_ADDR_WIDTH(CONFIG_ADDR_WIDTH),
         .LCD_PIXEL_LINE_NUM(LCD_PIXEL_LINE_NUM),
@@ -322,6 +333,4 @@ module top(
         .config_addr(page_config_addr),
         .config_data(page_main_config_data)
     );
-    
-    assign page_config_data = page_main_config_data;
 endmodule
