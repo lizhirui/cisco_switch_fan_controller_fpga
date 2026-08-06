@@ -2,7 +2,7 @@
 
 module uart_protocol_processor #(
         parameter RECV_PACKET_BYTE_LENGTH = 4,
-        parameter SEND_PACKET_BYTE_LENGTH = 3,
+        parameter SEND_PACKET_BYTE_LENGTH = 10,
         parameter VRAM_ADDR_WIDTH = 10,
         parameter VRAM_DATA_WIDTH = 8,
         parameter KEY_ID_WIDTH = 4,
@@ -46,7 +46,7 @@ module uart_protocol_processor #(
     localparam SEND_PACKET_RETURN_CODE_OFFSET = SEND_PACKET_ID_OFFSET + SEND_PACKET_ID_WIDTH;
     localparam SEND_PACKET_RETURN_CODE_WIDTH = 8;
     localparam SEND_PACKET_RETURN_VALUE_OFFSET = SEND_PACKET_RETURN_CODE_OFFSET + SEND_PACKET_RETURN_CODE_WIDTH;
-    localparam SEND_PACKET_RETURN_VALUE_WIDTH = 8;
+    localparam SEND_PACKET_RETURN_VALUE_WIDTH = 64;
     
     localparam CMD_CLONE_VRAM = RECV_PACKET_COMMAND_WIDTH'('h00);
     localparam CMD_READ_VRAM = RECV_PACKET_COMMAND_WIDTH'('h01);
@@ -57,6 +57,9 @@ module uart_protocol_processor #(
     localparam RETURN_CODE_SUCC = SEND_PACKET_RETURN_CODE_WIDTH'('h00);
     localparam RETURN_CODE_FAIL = SEND_PACKET_RETURN_CODE_WIDTH'('h01);
     
+    localparam READ_VRAM_CNT = 8;
+    localparam READ_VRAM_CNT_WIDTH = (READ_VRAM_CNT <= 1) ? 1 : $clog2(READ_VRAM_CNT);
+    
     localparam STATE_WIDTH = 4;
     localparam STATE_READ_RECV_PACKET = STATE_WIDTH'('d0);
     localparam STATE_DECODE_COMMAND = STATE_WIDTH'('d1);
@@ -64,20 +67,23 @@ module uart_protocol_processor #(
     localparam STATE_CLONE_VRAM_CMD_EXECUTE = STATE_WIDTH'('d3);
     localparam STATE_CLONE_VRAM_CMD_WAIT_FINISH = STATE_WIDTH'('d4);
     localparam STATE_CLONE_VRAM_CMD_SEND_RESP = STATE_WIDTH'('d5);
-    localparam STATE_READ_VRAM_CMD_EXECUTE = STATE_WIDTH'('d6);
-    localparam STATE_READ_VRAM_CMD_SEND_RESP = STATE_WIDTH'('d7);
-    localparam STATE_PRESS_KEY_CMD_EXECUTE = STATE_WIDTH'('d8);
-    localparam STATE_PRESS_KEY_CMD_SEND_RESP = STATE_WIDTH'('d9);
-    localparam STATE_READ_REG_CMD_EXECUTE = STATE_WIDTH'('d10);
-    localparam STATE_READ_REG_CMD_SEND_RESP = STATE_WIDTH'('d11);
-    localparam STATE_WRITE_REG_CMD_EXECUTE = STATE_WIDTH'('d12);
-    localparam STATE_WRITE_REG_CMD_SEND_RESP = STATE_WIDTH'('d13);
-    localparam STATE_WAIT_SEND_RESP = STATE_WIDTH'('d14);
+    localparam STATE_READ_VRAM_CMD_EXECUTE_SET_ADDRESS = STATE_WIDTH'('d6);
+    localparam STATE_READ_VRAM_CMD_EXECUTE_GET_DATA = STATE_WIDTH'('d7);
+    localparam STATE_READ_VRAM_CMD_SEND_RESP = STATE_WIDTH'('d8);
+    localparam STATE_PRESS_KEY_CMD_EXECUTE = STATE_WIDTH'('d9);
+    localparam STATE_PRESS_KEY_CMD_SEND_RESP = STATE_WIDTH'('d10);
+    localparam STATE_READ_REG_CMD_EXECUTE = STATE_WIDTH'('d11);
+    localparam STATE_READ_REG_CMD_SEND_RESP = STATE_WIDTH'('d12);
+    localparam STATE_WRITE_REG_CMD_EXECUTE = STATE_WIDTH'('d13);
+    localparam STATE_WRITE_REG_CMD_SEND_RESP = STATE_WIDTH'('d14);
+    localparam STATE_WAIT_SEND_RESP = STATE_WIDTH'('d15);
     
     logic[STATE_WIDTH - 1:0] cur_state;
     logic[STATE_WIDTH - 1:0] next_state;
     
     logic[RECV_PACKET_BYTE_LENGTH * 8 - 1:0] recv_packet_loaded;
+    logic[READ_VRAM_CNT_WIDTH - 1:0] read_vram_cnt;
+    logic[READ_VRAM_CNT * VRAM_DATA_WIDTH - 1:0] read_vram_buffer;
     
     always_ff @(posedge clk) begin
         if(rst) begin
@@ -105,7 +111,7 @@ module uart_protocol_processor #(
                     end
                     
                     CMD_READ_VRAM: begin
-                        next_state = STATE_READ_VRAM_CMD_EXECUTE;
+                        next_state = STATE_READ_VRAM_CMD_EXECUTE_SET_ADDRESS;
                     end
                     
                     CMD_PRESS_KEY: begin
@@ -144,8 +150,17 @@ module uart_protocol_processor #(
                 next_state = STATE_WAIT_SEND_RESP;
             end
             
-            STATE_READ_VRAM_CMD_EXECUTE: begin
-                next_state = STATE_READ_VRAM_CMD_SEND_RESP;
+            STATE_READ_VRAM_CMD_EXECUTE_SET_ADDRESS: begin
+                next_state = STATE_READ_VRAM_CMD_EXECUTE_GET_DATA;
+            end
+            
+            STATE_READ_VRAM_CMD_EXECUTE_GET_DATA: begin
+                if(read_vram_cnt >= unsigned'(READ_VRAM_CNT - 'b1)) begin
+                    next_state = STATE_READ_VRAM_CMD_SEND_RESP;
+                end
+                else begin
+                    next_state = STATE_READ_VRAM_CMD_EXECUTE_SET_ADDRESS;
+                end
             end
             
             STATE_READ_VRAM_CMD_SEND_RESP: begin
@@ -219,7 +234,7 @@ module uart_protocol_processor #(
                 
                 STATE_READ_VRAM_CMD_SEND_RESP: begin
                     send_packet[SEND_PACKET_RETURN_CODE_OFFSET +: SEND_PACKET_RETURN_CODE_WIDTH] <= RETURN_CODE_SUCC;
-                    send_packet[SEND_PACKET_RETURN_VALUE_OFFSET +: SEND_PACKET_RETURN_VALUE_WIDTH] <= clone_vram_rdata;
+                    send_packet[SEND_PACKET_RETURN_VALUE_OFFSET +: SEND_PACKET_RETURN_VALUE_WIDTH] <= read_vram_buffer;
                     send_packet_valid <= 1'b1;
                 end
                 
@@ -254,8 +269,13 @@ module uart_protocol_processor #(
         if(rst) begin
             clone_vram_raddr <= '0;
         end
-        else if(next_state == STATE_READ_VRAM_CMD_EXECUTE) begin
-            clone_vram_raddr <= recv_packet_loaded[RECV_PACKET_PARAMETER_OFFSET +: VRAM_ADDR_WIDTH];
+        else if(next_state == STATE_READ_VRAM_CMD_EXECUTE_SET_ADDRESS) begin
+            if(cur_state == STATE_DECODE_COMMAND) begin
+                clone_vram_raddr <= recv_packet_loaded[RECV_PACKET_PARAMETER_OFFSET +: VRAM_ADDR_WIDTH];
+            end
+            else begin
+                clone_vram_raddr <= clone_vram_raddr + 'b1;
+            end
         end
     end
     
@@ -310,6 +330,30 @@ module uart_protocol_processor #(
         end
         else if((cur_state == STATE_READ_RECV_PACKET) && (cur_state != next_state)) begin
             recv_packet_loaded <= recv_packet;
+        end
+    end
+    
+    always_ff @(posedge clk) begin
+        if(rst) begin
+            read_vram_cnt <= '0;
+        end
+        else if((cur_state == STATE_DECODE_COMMAND) && (next_state == STATE_READ_VRAM_CMD_EXECUTE_SET_ADDRESS)) begin
+            read_vram_cnt <= 'b0;
+        end
+        else if((cur_state == STATE_READ_VRAM_CMD_EXECUTE_GET_DATA) && (next_state == STATE_READ_VRAM_CMD_EXECUTE_SET_ADDRESS)) begin
+            read_vram_cnt <= read_vram_cnt + 'b1;
+        end
+    end
+    
+    always_ff @(posedge clk) begin
+        if(rst) begin
+            read_vram_buffer <= '0;
+        end
+        else if((cur_state == STATE_DECODE_COMMAND) && (next_state == STATE_READ_VRAM_CMD_EXECUTE_SET_ADDRESS)) begin
+            read_vram_buffer <= '0;
+        end
+        else if(cur_state == STATE_READ_VRAM_CMD_EXECUTE_GET_DATA) begin
+            read_vram_buffer[read_vram_cnt * VRAM_DATA_WIDTH +: VRAM_DATA_WIDTH] <= clone_vram_rdata;
         end
     end
 endmodule

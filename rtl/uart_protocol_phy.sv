@@ -2,8 +2,8 @@
 
 module uart_protocol_phy #(
         parameter DATA_WIDTH = 8,
-        parameter RECV_PACKET_BYTE_LENGTH = 3,
-        parameter SEND_PACKET_BYTE_LENGTH = 3
+        parameter RECV_PACKET_BYTE_LENGTH = 4,
+        parameter SEND_PACKET_BYTE_LENGTH = 10
     )(
         input logic clk,
         input logic rst,

@@ -42,7 +42,7 @@ module top(
     localparam CLK_FREQ = 50000000;
     localparam UART_DATA_WIDTH = 8;
     localparam UART_PROTOCOL_RECV_PACKET_BYTE_LENGTH = 4;
-    localparam UART_PROTOCOL_SEND_PACKET_BYTE_LENGTH = 3;
+    localparam UART_PROTOCOL_SEND_PACKET_BYTE_LENGTH = 10;
     localparam REG_ADDR_WIDTH = 8;
     localparam REG_DATA_WIDTH = 8;
     localparam KEY_ID_WIDTH = 4;
@@ -311,13 +311,10 @@ module top(
     );
 
     page_manager #(
-        .PAGE_ID_WIDTH(PAGE_ID_WIDTH),
-        .CONFIG_ADDR_WIDTH(CONFIG_ADDR_WIDTH)
+        .PAGE_ID_WIDTH(PAGE_ID_WIDTH)
     )page_manager_inst(
         .page_id(page_id),
-        .page_config_addr(page_config_addr),
         .page_config_data(page_config_data),
-        .page_main_config_addr(page_main_config_addr),
         .page_main_config_data(page_main_config_data)
     );
 
