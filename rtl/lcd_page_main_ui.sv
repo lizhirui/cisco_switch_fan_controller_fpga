@@ -33,8 +33,16 @@ module lcd_page_main_ui #(
                 'd2: begin
                     config_data <= make_draw_text_config(lcd_ui_x_t'(CHAR_WIDTH / 2), lcd_ui_y_t'('d0), LCD_UI_COLOR_WHITE, lcd_ui_text_data_t'({8'hf7, 8'hc6, 8'hc6, 8'hd6, 8'hd8, 8'hbf, 8'hc8, 8'hc9, 8'he7, 8'hb7, 8'h4f, 8'h43, 8'h53, 8'h49, 8'h43}));
                 end
-
+                
                 'd3: begin
+                    config_data <= make_draw_text_config(lcd_ui_x_t'((LCD_PIXEL_COL_NUM - CHAR_WIDTH * 6) / 2), lcd_ui_y_t'(CHAR_HEIGHT * 1.5), LCD_UI_COLOR_BLACK, lcd_ui_text_data_t'({8'hf1, 8'hc8, 8'hbe, 8'hd6, 8'hee, 8'hc0}));
+                end
+                
+                'd4: begin
+                    config_data <= make_draw_text_config(lcd_ui_x_t'((LCD_PIXEL_COL_NUM - CHAR_WIDTH * 8) / 2), lcd_ui_y_t'(CHAR_HEIGHT * 2.5), LCD_UI_COLOR_BLACK, lcd_ui_text_data_t'({8'h38, 8'h30, 8'h38, 8'h30, 8'h36, 8'h32, 8'h30, 8'h32}));
+                end
+
+                'd5: begin
                     config_data <= make_empty_config(LCD_UI_CONFIG_TYPE_FRAME_END);
                 end
 

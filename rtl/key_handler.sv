@@ -23,6 +23,7 @@ module key_handler #(
     localparam REPEAT_COUNTER_WIDTH = (REPEAT_INTERVAL_MS <= 1) ? 1 : $clog2(REPEAT_INTERVAL_MS);
     
     logic key_in_sync;
+    logic key_in_sync_valid;
     logic[DEBOUNCE_COUNTER_WIDTH - 1:0] debounce_counter;
     logic debounce_counter_timeout;
     logic[REPEAT_START_COUNTER_WIDTH - 1:0] repeat_start_counter;
@@ -45,11 +46,12 @@ module key_handler #(
         .clk(clk),
         .rst(rst),
         .din(key_in),
-        .dout(key_in_sync)
+        .dout(key_in_sync),
+        .dout_valid(key_in_sync_valid)
     );
 
     always_ff @(posedge clk) begin
-        if(rst) begin
+        if(rst || !key_in_sync_valid) begin
             pressed <= 1'b0;
             debounce_counter <= 'b0;
             press_pulse <= 1'b0;
@@ -82,7 +84,7 @@ module key_handler #(
     end
 
     always_ff @(posedge clk) begin
-        if(rst) begin
+        if(rst || !key_in_sync_valid) begin
             repeat_start_counter <= '0;
             repeat_counter <= '0;
             repeat_pulse <= 1'b0;

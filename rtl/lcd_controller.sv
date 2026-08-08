@@ -1,6 +1,7 @@
 `default_nettype none
 
 import lcd_ui_config_pkg::*;
+import lcd_ui_page_config_pkg::*;
 import lcd_font_stream_pkg::*;
 
 module lcd_controller #(
@@ -13,7 +14,6 @@ module lcd_controller #(
         parameter CHAR_HEIGHT = 16,
         parameter LCD_LINE_NUM = LCD_PIXEL_LINE_NUM / CHAR_HEIGHT,
         parameter LCD_COL_NUM = LCD_PIXEL_COL_NUM / CHAR_WIDTH,
-        parameter PAGE_ID_WIDTH = 2,
         parameter CONFIG_ADDR_WIDTH = 4,
         parameter VRAM_DEPTH = LCD_PIXEL_LINE_NUM * LCD_PIXEL_COL_NUM / LCD_DATA_WIDTH,
         parameter VRAM_ADDR_WIDTH = (VRAM_DEPTH <= 1) ? 1 : $clog2(VRAM_DEPTH)
@@ -135,7 +135,6 @@ module lcd_controller #(
     );
 
     lcd_ui_config_processor #(
-        .PAGE_ID_WIDTH(PAGE_ID_WIDTH),
         .CONFIG_ADDR_WIDTH(CONFIG_ADDR_WIDTH)
     )lcd_ui_config_processor_inst(
         .clk(clk),

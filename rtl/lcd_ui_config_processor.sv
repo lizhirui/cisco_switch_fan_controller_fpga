@@ -1,9 +1,9 @@
 `default_nettype none
 
 import lcd_ui_config_pkg::*;
+import lcd_ui_page_config_pkg::*;
 
 module lcd_ui_config_processor #(
-        parameter PAGE_ID_WIDTH = 2,
         parameter CONFIG_ADDR_WIDTH = 4
     )(
         input logic clk,
@@ -105,7 +105,7 @@ module lcd_ui_config_processor #(
     
     always_ff @(posedge clk) begin
         if(rst) begin
-            page_id_loaded <= '0;
+            page_id_loaded <= PAGE_CISCO_ID;
         end
         else if(page_id_in_valid) begin
             page_id_loaded <= page_id_in;

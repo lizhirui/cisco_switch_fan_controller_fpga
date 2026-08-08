@@ -27,8 +27,8 @@ module lcd_bright_controller #(
     logic lcd_leda_pwm_internal;
 
     pwm_generator #(
-        .FREQ_DIVIDE_BIT_WIDTH(FREQ_DIVIDE_WIDTH),
-        .DUTY_RATIO_BIT_WIDTH(LCD_BRIGHT_WIDTH),
+        .FREQ_DIVIDE_WIDTH(FREQ_DIVIDE_WIDTH),
+        .DUTY_RATIO_WIDTH(LCD_BRIGHT_WIDTH),
         .ASSERT_LEVEL(1'b0)
     )pwm_generator_inst(
         .clk(clk),
