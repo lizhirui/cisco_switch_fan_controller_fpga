@@ -54,7 +54,7 @@ module lcd_page_cisco_ui #(
     );
     
     binary_decimal_converter #(
-        .VALUE_WIDTH(PWM_DUTY_RATIO_WIDTH),
+        .VALUE_WIDTH(RPM_WIDTH),
         .DIGIT_NUM(RPM_TEXT_LEN)
     )binary_decimal_converter_fan1234_rpm_inst(
         .clk(clk),
@@ -64,7 +64,7 @@ module lcd_page_cisco_ui #(
     );
     
     binary_decimal_converter #(
-        .VALUE_WIDTH(PWM_DUTY_RATIO_WIDTH),
+        .VALUE_WIDTH(RPM_WIDTH),
         .DIGIT_NUM(RPM_TEXT_LEN)
     )binary_decimal_converter_fan5678_rpm_inst(
         .clk(clk),

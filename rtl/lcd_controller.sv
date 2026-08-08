@@ -16,7 +16,8 @@ module lcd_controller #(
         parameter LCD_COL_NUM = LCD_PIXEL_COL_NUM / CHAR_WIDTH,
         parameter CONFIG_ADDR_WIDTH = 4,
         parameter VRAM_DEPTH = LCD_PIXEL_LINE_NUM * LCD_PIXEL_COL_NUM / LCD_DATA_WIDTH,
-        parameter VRAM_ADDR_WIDTH = (VRAM_DEPTH <= 1) ? 1 : $clog2(VRAM_DEPTH)
+        parameter VRAM_ADDR_WIDTH = (VRAM_DEPTH <= 1) ? 1 : $clog2(VRAM_DEPTH),
+        parameter ENABLE_DRAW_BITMAP = 1'b0
     )(
         input logic clk,
         input logic rst,
@@ -154,7 +155,8 @@ module lcd_controller #(
     lcd_ui_renderer #(
         .LCD_PIXEL_LINE_NUM(LCD_PIXEL_LINE_NUM),
         .LCD_PIXEL_COL_NUM(LCD_PIXEL_COL_NUM),
-        .ROM_ADDR_WIDTH(ROM_ADDR_WIDTH)
+        .ROM_ADDR_WIDTH(ROM_ADDR_WIDTH),
+        .ENABLE_DRAW_BITMAP(ENABLE_DRAW_BITMAP)
     )lcd_ui_renderer_inst(
         .clk(clk),
         .rst(rst),
@@ -280,7 +282,8 @@ module lcd_controller #(
         .LCD_PIXEL_LINE_NUM(LCD_PIXEL_LINE_NUM),
         .LCD_PIXEL_COL_NUM(LCD_PIXEL_COL_NUM),
         .VRAM_ADDR_WIDTH(VRAM_ADDR_WIDTH),
-        .VRAM_DATA_WIDTH(LCD_DATA_WIDTH)
+        .VRAM_DATA_WIDTH(LCD_DATA_WIDTH),
+        .ENABLE_DRAW_BITMAP(ENABLE_DRAW_BITMAP)
     )lcd_ui_draw_writer_inst(
         .clk(clk),
         .rst(rst),

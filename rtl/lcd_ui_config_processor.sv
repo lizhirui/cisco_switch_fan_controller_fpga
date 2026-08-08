@@ -105,7 +105,7 @@ module lcd_ui_config_processor #(
     
     always_ff @(posedge clk) begin
         if(rst) begin
-            page_id_loaded <= PAGE_CISCO_ID;
+            page_id_loaded <= PAGE_MAIN_ID;
         end
         else if(page_id_in_valid) begin
             page_id_loaded <= page_id_in;

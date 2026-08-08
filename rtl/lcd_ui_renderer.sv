@@ -6,7 +6,8 @@ import lcd_font_stream_pkg::*;
 module lcd_ui_renderer #(
         parameter LCD_PIXEL_LINE_NUM = 64,
         parameter LCD_PIXEL_COL_NUM = 128,
-        parameter ROM_ADDR_WIDTH = 24
+        parameter ROM_ADDR_WIDTH = 24,
+        parameter ENABLE_DRAW_BITMAP = 1'b1
     )(
         input logic clk,
         input logic rst,
@@ -121,7 +122,7 @@ module lcd_ui_renderer #(
                     else if(decoded_config_draw_text) begin
                         next_state = STATE_DRAW_TEXT_CHECK;
                     end
-                    else if(decoded_config_draw_bitmap) begin
+                    else if(ENABLE_DRAW_BITMAP && decoded_config_draw_bitmap) begin
                         next_state = STATE_DRAW_BITMAP_WAIT_RENDER_PIPELINE_IDLE;
                     end
                     else if(decoded_config_fill_rect) begin
@@ -312,7 +313,7 @@ module lcd_ui_renderer #(
         if(rst) begin
             draw_writer_start <= 1'b0;
         end
-        else if((next_state == STATE_DRAW_BITMAP_START) || (next_state == STATE_FILL_RECT_START) || (next_state == STATE_DRAW_LINE_START) || (next_state == STATE_CLEAR_START)) begin
+        else if((ENABLE_DRAW_BITMAP && (next_state == STATE_DRAW_BITMAP_START)) || (next_state == STATE_FILL_RECT_START) || (next_state == STATE_DRAW_LINE_START) || (next_state == STATE_CLEAR_START)) begin
             draw_writer_start <= 1'b1;
         end
         else begin
@@ -412,5 +413,5 @@ module lcd_ui_renderer #(
         .char_inc2(char_inc2)
     );
     
-    assign draw_writer_config_load = ((cur_state == STATE_WAIT_CONFIG) && ((next_state == STATE_DRAW_BITMAP_WAIT_RENDER_PIPELINE_IDLE) || (next_state == STATE_FILL_RECT_WAIT_RENDER_PIPELINE_IDLE) || (next_state == STATE_DRAW_LINE_WAIT_RENDER_PIPELINE_IDLE) || (next_state == STATE_CLEAR_WAIT_RENDER_PIPELINE_IDLE))) ? 1'b1 : 1'b0;
+    assign draw_writer_config_load = ((cur_state == STATE_WAIT_CONFIG) && ((ENABLE_DRAW_BITMAP && (next_state == STATE_DRAW_BITMAP_WAIT_RENDER_PIPELINE_IDLE)) || (next_state == STATE_FILL_RECT_WAIT_RENDER_PIPELINE_IDLE) || (next_state == STATE_DRAW_LINE_WAIT_RENDER_PIPELINE_IDLE) || (next_state == STATE_CLEAR_WAIT_RENDER_PIPELINE_IDLE))) ? 1'b1 : 1'b0;
 endmodule

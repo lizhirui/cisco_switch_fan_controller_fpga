@@ -51,10 +51,8 @@ set_false_path -from [get_ports {lcd_rom_so}]
 set_false_path -from [get_ports {eeprom_sda}]
 
 set_false_path -to [get_ports {cisco_fan_fb[*]}]
+set_false_path -to [get_ports {main_fan_pwm[*]}]
 set_false_path -to [get_ports {uart_txd}]
-
-set_false_path -to [get_ports {main_fan_pwm}]
-set_false_path -to [get_ports {eeprom_wp}]
 
 set_false_path -to [get_ports {eeprom_addr[*]}]
 set_false_path -to [get_ports {eeprom_scl}]

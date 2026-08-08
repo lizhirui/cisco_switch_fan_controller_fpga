@@ -3,7 +3,9 @@
 import lcd_ui_config_pkg::*;
 import lcd_ui_page_config_pkg::*;
 
-module top(
+module top #(
+        parameter MAIN_FAN_NUM = 8
+    )(
         input logic clk,
         input logic rst_n,
         input logic cisco_fan1234_pwm,
@@ -11,10 +13,10 @@ module top(
         input logic cisco_led_status_green,
         input logic cisco_led_status_red,
         output logic[7:0] cisco_fan_fb,
-        output logic[7:0] main_fan_pwm,
-        input logic[7:0] main_fan_fb,
+        output logic[MAIN_FAN_NUM - 1:0] main_fan_pwm,
+        input logic[MAIN_FAN_NUM - 1:0] main_fan_fb,
         output logic[2:0] eeprom_addr,
-        inout logic eeprom_sda,
+        inout wire eeprom_sda,
         output logic eeprom_scl,
         output logic eeprom_wp,
         output logic lcd_rst,
@@ -41,7 +43,9 @@ module top(
     );
     
     localparam CLK_FREQ = 50000000;
+    localparam FREQ_DIVIDE_WIDTH = 26;
     localparam PWM_DUTY_RATIO_WIDTH = 8;
+    localparam PPR = 2;
     localparam RPM_WIDTH = 14;
     localparam UART_DATA_WIDTH = 8;
     localparam UART_PROTOCOL_RECV_PACKET_BYTE_LENGTH = 4;
@@ -71,6 +75,20 @@ module top(
     logic[PWM_DUTY_RATIO_WIDTH - 1:0] cisco_fan5678_pwm_duty_ratio;
     logic[RPM_WIDTH - 1:0] cisco_fan1234_rpm;
     logic[RPM_WIDTH - 1:0] cisco_fan5678_rpm;
+    logic cisco_led_status_green_sync;
+    logic cisco_led_status_red_sync;
+    logic[PWM_DUTY_RATIO_WIDTH - 1:0] main_fan_pwm_duty_ratio_cfg_wdata[0:MAIN_FAN_NUM - 1];
+    logic[MAIN_FAN_NUM - 1:0] main_fan_pwm_duty_ratio_cfg_we;
+    logic[PWM_DUTY_RATIO_WIDTH - 1:0] main_fan_pwm_duty_ratio_reg_wdata[0:MAIN_FAN_NUM - 1];
+    logic[MAIN_FAN_NUM - 1:0] main_fan_pwm_duty_ratio_reg_we;
+    logic[PWM_DUTY_RATIO_WIDTH - 1:0] main_fan_pwm_duty_ratio_main_wdata[0:MAIN_FAN_NUM - 1];
+    logic[MAIN_FAN_NUM - 1:0] main_fan_pwm_duty_ratio_main_we;
+    logic[PWM_DUTY_RATIO_WIDTH - 1:0] main_fan_pwm_duty_ratio[0:MAIN_FAN_NUM - 1];
+    logic[RPM_WIDTH - 1:0] main_fan_rpm[0:MAIN_FAN_NUM - 1];
+    logic eeprom_load_data_valid;
+    logic eeprom_save_done;
+    logic eeprom_busy;
+    logic eeprom_error;
     logic[REG_ADDR_WIDTH - 1:0] reg_addr;
     logic[REG_DATA_WIDTH - 1:0] reg_wdata;
     logic reg_we;
@@ -96,8 +114,6 @@ module top(
     logic[PAGE_ID_WIDTH - 1:0] page_id;
     logic[CONFIG_ADDR_WIDTH - 1:0] page_config_addr;
     lcd_ui_config_data_t page_config_data;
-    lcd_ui_config_data_t page_main_config_data;
-    lcd_ui_config_data_t page_cisco_config_data;
     logic[VRAM_ADDR_WIDTH - 1:0] clone_vram_raddr;
     logic[LCD_DATA_WIDTH - 1:0] clone_vram_rdata;
     logic clone_vram_start;
@@ -120,6 +136,14 @@ module top(
     logic[UART_PROTOCOL_SEND_PACKET_BYTE_LENGTH * 8 - 1:0] send_packet;
     logic send_packet_valid;
     logic send_packet_pop;
+    logic[PAGE_ID_WIDTH - 1:0] page_switcher_page_id_wdata;
+    logic page_switcher_page_id_we;
+    lcd_ui_config_data_t page_main_config_data;
+    lcd_ui_config_data_t page_cisco_config_data;
+    lcd_ui_config_data_t page_main_fan_config_data;
+    lcd_ui_config_data_t page_message_config_data;
+    
+    genvar i;
 
     poweron_reset_generator poweron_reset_generator_inst(
         .clk(clk),
@@ -143,14 +167,94 @@ module top(
         .rst(rst),
         .cisco_fan1234_pwm(cisco_fan1234_pwm),
         .cisco_fan5678_pwm(cisco_fan5678_pwm),
-        .cisco_led_status_green(cisco_led_status_green),
-        .cisco_led_status_red(cisco_led_status_red),
         .cisco_fan_fb(cisco_fan_fb),
         .cisco_fan1234_pwm_duty_ratio(cisco_fan1234_pwm_duty_ratio),
         .cisco_fan5678_pwm_duty_ratio(cisco_fan5678_pwm_duty_ratio),
         .cisco_fan1234_rpm(cisco_fan1234_rpm),
         .cisco_fan5678_rpm(cisco_fan5678_rpm)
     );
+    
+    signal_syncer #(
+        .WIDTH(4),
+        .RESET_VALUE(1'b0)
+    )signal_syncer_cisco_led_status_inst(
+        .clk(clk),
+        .rst(rst),
+        .din({cisco_led_status_green, cisco_led_status_red}),
+        .dout({cisco_led_status_green_sync, cisco_led_status_red_sync}),
+        .dout_valid()
+    );
+    
+    main_fan_regfile #(
+        .PWM_DUTY_RATIO_WIDTH(PWM_DUTY_RATIO_WIDTH),
+        .MAIN_FAN_NUM(MAIN_FAN_NUM)
+    )main_fan_regfile_inst(
+        .clk(clk),
+        .rst(rst),
+        .main_fan_pwm_duty_ratio_cfg_wdata(main_fan_pwm_duty_ratio_cfg_wdata),
+        .main_fan_pwm_duty_ratio_cfg_we(main_fan_pwm_duty_ratio_cfg_we),
+        .main_fan_pwm_duty_ratio_reg_wdata(main_fan_pwm_duty_ratio_reg_wdata),
+        .main_fan_pwm_duty_ratio_reg_we(main_fan_pwm_duty_ratio_reg_we),
+        .main_fan_pwm_duty_ratio_main_wdata(main_fan_pwm_duty_ratio_main_wdata),
+        .main_fan_pwm_duty_ratio_main_we(main_fan_pwm_duty_ratio_main_we),
+        .main_fan_pwm_duty_ratio(main_fan_pwm_duty_ratio)
+    );
+    
+    generate
+        for(i = 0;i < MAIN_FAN_NUM;i++) begin: main_fan_pwm_generator_gen
+            pwm_generator #(
+                .FREQ_DIVIDE_WIDTH(FREQ_DIVIDE_WIDTH),
+                .DUTY_RATIO_WIDTH(PWM_DUTY_RATIO_WIDTH),
+                .ASSERT_LEVEL(1'b1)
+            )pwm_generator_inst(
+                .clk(clk),
+                .rst(rst),
+                .freq_divide(CLK_FREQ / 200000),
+                .duty_ratio(main_fan_pwm_duty_ratio[i]),
+                .out(main_fan_pwm[i])  
+            );
+        end
+    endgenerate
+    
+    multi_fan_rpm_measurer #(
+        .CLK_FREQ(CLK_FREQ),
+        .PPR(PPR),
+        .FAN_NUM(MAIN_FAN_NUM),
+        .RPM_WIDTH(RPM_WIDTH),
+        .RPM_SCALE_SHIFT(6)
+    )multi_fan_rpm_measurer_inst(
+        .clk(clk),
+        .rst(rst),
+        .fan_fb(main_fan_fb),
+        .rpm(main_fan_rpm)
+    );
+    
+    at24c02_controller #(
+        .CLK_FREQ(CLK_FREQ),
+        .I2C_FREQ(100000),
+        .DATA_NUM(MAIN_FAN_NUM),
+        .EEPROM_ADDR(3'b000),
+        .EEPROM_START_ADDR(8'h00),
+        .AUTO_LOAD(1'b1),
+        .AUTO_LOAD_DELAY_CYCLES(CLK_FREQ / 100)
+    )at24c02_controller_inst(
+        .clk(clk),
+        .rst(rst),
+        .save(key_save_pulse),
+        .load(key_load_pulse),
+        .save_data(main_fan_pwm_duty_ratio),
+        .load_data(main_fan_pwm_duty_ratio_cfg_wdata),
+        .load_data_valid(eeprom_load_data_valid),
+        .save_done(eeprom_save_done),
+        .busy(eeprom_busy),
+        .error(eeprom_error),
+        .eeprom_addr(eeprom_addr),
+        .eeprom_sda(eeprom_sda),
+        .eeprom_scl(eeprom_scl),
+        .eeprom_wp(eeprom_wp)
+    );
+
+    assign main_fan_pwm_duty_ratio_cfg_we = {MAIN_FAN_NUM{eeprom_load_data_valid}};
     
     uart #(
         .CLOCK_FREQUENCY(CLK_FREQ),
@@ -253,7 +357,9 @@ module top(
     register_controller #(
         .ADDR_WIDTH(REG_ADDR_WIDTH),
         .DATA_WIDTH(REG_DATA_WIDTH),
-        .LCD_BRIGHT_WIDTH(LCD_BRIGHT_WIDTH)
+        .LCD_BRIGHT_WIDTH(LCD_BRIGHT_WIDTH),
+        .PWM_DUTY_RATIO_WIDTH(PWM_DUTY_RATIO_WIDTH),
+        .MAIN_FAN_NUM(MAIN_FAN_NUM)
     )register_controller_inst(
         .clk(clk),
         .rst(rst),
@@ -261,6 +367,9 @@ module top(
         .wdata(reg_wdata),
         .we(reg_we),
         .rdata(reg_rdata),
+        .main_fan_pwm_duty_ratio_wdata(main_fan_pwm_duty_ratio_reg_wdata),
+        .main_fan_pwm_duty_ratio_we(main_fan_pwm_duty_ratio_reg_we),
+        .main_fan_pwm_duty_ratio_rdata(main_fan_pwm_duty_ratio),
         .bright_wdata(bright_in),
         .bright_we(bright_in_valid),
         .bright_rdata(bright),
@@ -337,23 +446,41 @@ module top(
     
     page_switcher page_switcher_inst(
         .page_id(page_id),
-        .page_id_wdata(page_id_in),
-        .page_id_we(page_id_in_valid),
+        .page_id_wdata(page_switcher_page_id_wdata),
+        .page_id_we(page_switcher_page_id_we),
         .key_page_prev_pulse(key_page_prev_pulse),
         .key_page_next_pulse(key_page_next_pulse),
         .reg_page_id_wdata(reg_page_id_wdata),
-        .reg_page_id_we(reg_page_id_we),
-        .page_main_ui_page_id_wdata('0),
-        .page_main_ui_page_id_we(1'b0),
-        .page_cisco_ui_page_id_wdata('0),
-        .page_cisco_ui_page_id_we(1'b0)
+        .reg_page_id_we(reg_page_id_we)
+    );
+    
+    page_message_controller #(
+        .CLK_FREQ(CLK_FREQ)
+    )page_message_controller_inst(
+        .clk(clk),
+        .rst(rst),
+        .page_id(page_id),
+        .page_id_wdata_in(page_switcher_page_id_wdata),
+        .page_id_we_in(page_switcher_page_id_we),
+        .page_id_wdata(page_id_in),
+        .page_id_we(page_id_in_valid),
+        .key_save_pulse(key_save_pulse),
+        .key_load_pulse(key_load_pulse),
+        .eeprom_save_done(eeprom_save_done),
+        .eeprom_load_done(eeprom_load_data_valid),
+        .eeprom_busy(eeprom_busy),
+        .eeprom_error(eeprom_error)
     );
 
-    page_manager page_manager_inst(
+    page_manager #(
+        .MAIN_FAN_NUM(MAIN_FAN_NUM)
+    )page_manager_inst(
         .page_id(page_id),
         .page_config_data(page_config_data),
         .page_main_config_data(page_main_config_data),
-        .page_cisco_config_data(page_cisco_config_data)
+        .page_cisco_config_data(page_cisco_config_data),
+        .page_main_fan_config_data(page_main_fan_config_data),
+        .page_message_config_data(page_message_config_data)
     );
 
     lcd_page_main_ui #(
@@ -380,11 +507,48 @@ module top(
         .rst(rst),
         .config_addr(page_config_addr),
         .config_data(page_cisco_config_data),
-        .cisco_led_status_green(cisco_led_status_green),
-        .cisco_led_status_red(cisco_led_status_red),
+        .cisco_led_status_green(cisco_led_status_green_sync),
+        .cisco_led_status_red(cisco_led_status_red_sync),
         .cisco_fan1234_pwm_duty_ratio(cisco_fan1234_pwm_duty_ratio),
         .cisco_fan5678_pwm_duty_ratio(cisco_fan5678_pwm_duty_ratio),
         .cisco_fan1234_rpm(cisco_fan1234_rpm),
         .cisco_fan5678_rpm(cisco_fan5678_rpm)
-    ); 
+    );
+    
+    lcd_page_main_fan_ui #(
+        .CONFIG_ADDR_WIDTH(CONFIG_ADDR_WIDTH),
+        .LCD_PIXEL_LINE_NUM(LCD_PIXEL_LINE_NUM),
+        .LCD_PIXEL_COL_NUM(LCD_PIXEL_COL_NUM),
+        .CHAR_WIDTH(CHAR_WIDTH),
+        .CHAR_HEIGHT(CHAR_HEIGHT),
+        .PWM_DUTY_RATIO_WIDTH(PWM_DUTY_RATIO_WIDTH),
+        .RPM_WIDTH(RPM_WIDTH),
+        .MAIN_FAN_NUM(MAIN_FAN_NUM)
+    )lcd_page_main_fan_ui_inst(
+        .clk(clk),
+        .rst(rst),
+        .config_addr(page_config_addr),
+        .config_data(page_main_fan_config_data),
+        .page_id(page_id),
+        .key_add_pulse(key_add_pulse),
+        .key_sub_pulse(key_sub_pulse),
+        .main_fan_pwm_duty_ratio_wdata(main_fan_pwm_duty_ratio_main_wdata),
+        .main_fan_pwm_duty_ratio_we(main_fan_pwm_duty_ratio_main_we),
+        .main_fan_pwm_duty_ratio(main_fan_pwm_duty_ratio),
+        .main_fan_rpm(main_fan_rpm)
+    );
+    
+    lcd_page_message_ui #(
+        .CONFIG_ADDR_WIDTH(CONFIG_ADDR_WIDTH),
+        .LCD_PIXEL_LINE_NUM(LCD_PIXEL_LINE_NUM),
+        .LCD_PIXEL_COL_NUM(LCD_PIXEL_COL_NUM),
+        .CHAR_WIDTH(CHAR_WIDTH),
+        .CHAR_HEIGHT(CHAR_HEIGHT)
+    )lcd_page_message_ui_inst(
+        .clk(clk),
+        .rst(rst),
+        .page_id(page_id),
+        .config_addr(page_config_addr),
+        .config_data(page_message_config_data)
+    );
 endmodule

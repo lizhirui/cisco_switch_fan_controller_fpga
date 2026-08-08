@@ -170,6 +170,17 @@ set_location_assignment PIN_32 -to uart_rxd
 
 set_instance_assignment -name FORCE_SYNCH_CLEAR ON -to lcd_controller_inst|lcd_rom_reader_inst|data[0]
 set_instance_assignment -name FAST_INPUT_REGISTER ON -to lcd_controller_inst|lcd_rom_reader_inst|data[0]
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/page_message_controller.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/lcd_page_message_ui.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/i2c_master_byte.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/at24c02_controller.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/multi_fan_rpm_measurer.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/square_wave_generator.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/dual_pwm_duty_ratio_calculator.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/multi_fan_rpm_calculator.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/main_fan_regfile.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/lcd_page_main_fan_ui.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/fan_rpm_calculator.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/binary_decimal_converter.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/page_switcher.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/lcd_ui_page_config_pkg.sv

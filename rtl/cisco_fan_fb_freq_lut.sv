@@ -17,7 +17,7 @@ module cisco_fan_fb_freq_lut #(
 
     localparam LUT_DATA_WIDTH = FREQ_DIVIDE_WIDTH + RPM_WIDTH;
 
-    (* ramstyle = "M9K" *)logic[LUT_DATA_WIDTH - 1:0] fan_fb_lut[0:(1 << DUTY_RATIO_WIDTH) - 1];
+    (* romstyle = "M9K" *)logic[LUT_DATA_WIDTH - 1:0] fan_fb_lut[0:(1 << DUTY_RATIO_WIDTH) - 1];
 
     initial begin
         $readmemh("cisco_fan_fb_freq_lut.hex", fan_fb_lut);

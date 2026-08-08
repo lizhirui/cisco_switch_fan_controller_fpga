@@ -22,7 +22,7 @@ module fwft_fifo #(
 
     logic[DEPTH_WIDTH:0] rptr;
     logic[DEPTH_WIDTH:0] wptr;
-    logic[WIDTH - 1:0] buffer[0:DEPTH - 1];
+    (* ramstyle = "M9K" *)logic[WIDTH - 1:0] buffer[0:DEPTH - 1];
     logic push_fire;
     logic pop_fire;
 

@@ -10,8 +10,6 @@ module cisco_interface_simulator #(
         
         input logic cisco_fan1234_pwm,
         input logic cisco_fan5678_pwm,
-        input logic cisco_led_status_green,
-        input logic cisco_led_status_red,
         output logic[7:0] cisco_fan_fb,
         
         output logic[PWM_DUTY_RATIO_WIDTH - 1:0] cisco_fan1234_pwm_duty_ratio,
@@ -20,7 +18,7 @@ module cisco_interface_simulator #(
         output logic[RPM_WIDTH - 1:0] cisco_fan5678_rpm
     );
     
-    localparam CNT_WIDTH = 32;
+    localparam CNT_WIDTH = 16;
     localparam FREQ_DIVIDE_WIDTH = 26;
     
     logic[CNT_WIDTH - 1:0] fan1234_pwm_high_level_cnt;
@@ -29,6 +27,8 @@ module cisco_interface_simulator #(
     logic[CNT_WIDTH - 1:0] fan5678_pwm_total_cnt;
     logic[FREQ_DIVIDE_WIDTH - 1:0] fan1234_pwm_freq_divide;
     logic[FREQ_DIVIDE_WIDTH - 1:0] fan5678_pwm_freq_divide; 
+    logic fan1234_fb;
+    logic fan5678_fb;
     
     genvar i;
     
@@ -58,22 +58,18 @@ module cisco_interface_simulator #(
         .period_valid()
     );
     
-    pwm_duty_ratio_calculator #(
+    dual_pwm_duty_ratio_calculator #(
         .CNT_WIDTH(CNT_WIDTH),
         .DUTY_RATIO_WIDTH(PWM_DUTY_RATIO_WIDTH)
-    )pwm_duty_ratio_calculator_fan1234_pwm_inst(
-        .high_level_cnt(fan1234_pwm_high_level_cnt),
-        .total_cnt(fan1234_pwm_total_cnt),
-        .duty_ratio(cisco_fan1234_pwm_duty_ratio)
-    );
-    
-    pwm_duty_ratio_calculator #(
-        .CNT_WIDTH(CNT_WIDTH),
-        .DUTY_RATIO_WIDTH(PWM_DUTY_RATIO_WIDTH)
-    )pwm_duty_ratio_calculator_fan5678_pwm_inst(
-        .high_level_cnt(fan5678_pwm_high_level_cnt),
-        .total_cnt(fan5678_pwm_total_cnt),
-        .duty_ratio(cisco_fan5678_pwm_duty_ratio)
+    )dual_pwm_duty_ratio_calculator_inst(
+        .clk(clk),
+        .rst(rst),
+        .high_level_cnt_a(fan1234_pwm_high_level_cnt),
+        .total_cnt_a(fan1234_pwm_total_cnt),
+        .high_level_cnt_b(fan5678_pwm_high_level_cnt),
+        .total_cnt_b(fan5678_pwm_total_cnt),
+        .duty_ratio_a(cisco_fan1234_pwm_duty_ratio),
+        .duty_ratio_b(cisco_fan5678_pwm_duty_ratio)
     );
     
     cisco_fan_fb_freq_lut #(
@@ -89,19 +85,26 @@ module cisco_interface_simulator #(
         .rpm_b(cisco_fan5678_rpm)
     );
     
-    generate
-        for(i = 0;i < 8;i++) begin: pwm_generator
-            pwm_generator #(
-                .FREQ_DIVIDE_WIDTH(FREQ_DIVIDE_WIDTH),
-                .DUTY_RATIO_WIDTH(PWM_DUTY_RATIO_WIDTH),
-                .ASSERT_LEVEL(1'b1)
-            )pwm_generator_inst(
-                .clk(clk),
-                .rst(rst),
-                .freq_divide((i < 4) ? fan1234_pwm_freq_divide : fan5678_pwm_freq_divide),
-                .duty_ratio({1'b1, {(PWM_DUTY_RATIO_WIDTH - 1){1'b0}}}),
-                .out(cisco_fan_fb[i])
-            );
-        end
-    endgenerate
+    square_wave_generator #(
+        .FREQ_DIVIDE_WIDTH(FREQ_DIVIDE_WIDTH),
+        .ASSERT_LEVEL(1'b1)
+    )square_wave_generator_fan1234_inst(
+        .clk(clk),
+        .rst(rst),
+        .freq_divide(fan1234_pwm_freq_divide),
+        .out(fan1234_fb)
+    );
+
+    square_wave_generator #(
+        .FREQ_DIVIDE_WIDTH(FREQ_DIVIDE_WIDTH),
+        .ASSERT_LEVEL(1'b1)
+    )square_wave_generator_fan5678_inst(
+        .clk(clk),
+        .rst(rst),
+        .freq_divide(fan5678_pwm_freq_divide),
+        .out(fan5678_fb)
+    );
+
+    assign cisco_fan_fb[3:0] = {4{fan1234_fb}};
+    assign cisco_fan_fb[7:4] = {4{fan5678_fb}};
 endmodule

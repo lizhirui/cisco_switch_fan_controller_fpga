@@ -11,12 +11,5 @@ module poweron_reset_generator(
         end
     end
 
-    always_ff @(posedge clk) begin
-        if(cnt != '1) begin
-            rst_out <= 1'b1;
-        end
-        else begin
-            rst_out <= 1'b0;
-        end
-    end
+    assign rst_out = ~&cnt;
 endmodule

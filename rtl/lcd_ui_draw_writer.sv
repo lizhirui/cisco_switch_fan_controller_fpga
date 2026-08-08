@@ -7,7 +7,8 @@ module lcd_ui_draw_writer #(
         parameter LCD_PIXEL_LINE_NUM = 64,
         parameter LCD_PIXEL_COL_NUM = 128,
         parameter VRAM_ADDR_WIDTH = 10,
-        parameter VRAM_DATA_WIDTH = 8
+        parameter VRAM_DATA_WIDTH = 8,
+        parameter ENABLE_DRAW_BITMAP = 1'b1
     )(
         input logic clk,
         input logic rst,
@@ -227,7 +228,7 @@ module lcd_ui_draw_writer #(
             
             STATE_WAIT_VWC_IDLE: begin
                 if(!vwc_busy) begin
-                    if(config_type_loaded == LCD_UI_CONFIG_TYPE_DRAW_BITMAP) begin
+                    if(ENABLE_DRAW_BITMAP && (config_type_loaded == LCD_UI_CONFIG_TYPE_DRAW_BITMAP)) begin
                         next_state = STATE_DRAW_BITMAP_INIT;
                     end
                     else if(config_type_loaded == LCD_UI_CONFIG_TYPE_FILL_RECT) begin
@@ -412,10 +413,10 @@ module lcd_ui_draw_writer #(
         end
     end
     
-    assign vwc_raddr = (config_type_loaded == LCD_UI_CONFIG_TYPE_DRAW_BITMAP) ? draw_bitmap_vwc_addr : ((config_type_loaded == LCD_UI_CONFIG_TYPE_DRAW_LINE) ? draw_line_addr : fill_rect_addr);
-    assign vwc_waddr = (config_type_loaded == LCD_UI_CONFIG_TYPE_CLEAR) ? clear_addr : ((config_type_loaded == LCD_UI_CONFIG_TYPE_DRAW_BITMAP) ? draw_bitmap_vwc_addr : ((config_type_loaded == LCD_UI_CONFIG_TYPE_DRAW_LINE) ? draw_line_addr : fill_rect_addr));
-    assign vwc_wdata = (config_type_loaded == LCD_UI_CONFIG_TYPE_CLEAR) ? clear_wdata : ((config_type_loaded == LCD_UI_CONFIG_TYPE_DRAW_BITMAP) ? draw_bitmap_vwc_wdata : ((config_type_loaded == LCD_UI_CONFIG_TYPE_DRAW_LINE) ? draw_line_wdata_loaded : fill_rect_wdata));
-    assign vwc_we = ((cur_state == STATE_DRAW_BITMAP_LOW_WRITE) || (cur_state == STATE_DRAW_BITMAP_HIGH_WRITE) || (cur_state == STATE_FILL_RECT_WRITE) || (cur_state == STATE_DRAW_LINE_WRITE) || (cur_state == STATE_CLEAR_WRITE)) ? 1'b1 : 1'b0;
+    assign vwc_raddr = (ENABLE_DRAW_BITMAP && (config_type_loaded == LCD_UI_CONFIG_TYPE_DRAW_BITMAP)) ? draw_bitmap_vwc_addr : ((config_type_loaded == LCD_UI_CONFIG_TYPE_DRAW_LINE) ? draw_line_addr : fill_rect_addr);
+    assign vwc_waddr = (config_type_loaded == LCD_UI_CONFIG_TYPE_CLEAR) ? clear_addr : ((ENABLE_DRAW_BITMAP && (config_type_loaded == LCD_UI_CONFIG_TYPE_DRAW_BITMAP)) ? draw_bitmap_vwc_addr : ((config_type_loaded == LCD_UI_CONFIG_TYPE_DRAW_LINE) ? draw_line_addr : fill_rect_addr));
+    assign vwc_wdata = (config_type_loaded == LCD_UI_CONFIG_TYPE_CLEAR) ? clear_wdata : ((ENABLE_DRAW_BITMAP && (config_type_loaded == LCD_UI_CONFIG_TYPE_DRAW_BITMAP)) ? draw_bitmap_vwc_wdata : ((config_type_loaded == LCD_UI_CONFIG_TYPE_DRAW_LINE) ? draw_line_wdata_loaded : fill_rect_wdata));
+    assign vwc_we = ((ENABLE_DRAW_BITMAP && ((cur_state == STATE_DRAW_BITMAP_LOW_WRITE) || (cur_state == STATE_DRAW_BITMAP_HIGH_WRITE))) || (cur_state == STATE_FILL_RECT_WRITE) || (cur_state == STATE_DRAW_LINE_WRITE) || (cur_state == STATE_CLEAR_WRITE)) ? 1'b1 : 1'b0;
     
     always_ff @(posedge clk) begin
         if(rst) begin
@@ -426,16 +427,24 @@ module lcd_ui_draw_writer #(
         end
     end
     
-    lcd_ui_bitmap_info_rom lcd_ui_bitmap_info_rom_inst(
-        .bitmap_id(draw_bitmap_config_loaded.bitmap_id),
-        .bitmap_info(draw_bitmap_info)
-    );
+    generate
+        if(ENABLE_DRAW_BITMAP) begin: bitmap_rom_gen
+            lcd_ui_bitmap_info_rom lcd_ui_bitmap_info_rom_inst(
+                .bitmap_id(draw_bitmap_config_loaded.bitmap_id),
+                .bitmap_info(draw_bitmap_info)
+            );
 
-    lcd_ui_bitmap_data_rom lcd_ui_bitmap_data_rom_inst(
-        .clk(clk),
-        .addr(draw_bitmap_rom_addr),
-        .data(draw_bitmap_rom_data)
-    );
+            lcd_ui_bitmap_data_rom lcd_ui_bitmap_data_rom_inst(
+                .clk(clk),
+                .addr(draw_bitmap_rom_addr),
+                .data(draw_bitmap_rom_data)
+            );
+        end
+        else begin
+            assign draw_bitmap_info = '0;
+            assign draw_bitmap_rom_data = '0;
+        end
+    endgenerate
     
     assign config_type_loaded = get_config_type(config_data_loaded);
     assign draw_bitmap_config_loaded = config_data_loaded[LCD_UI_CONFIG_PAYLOAD_LSB +: LCD_UI_DRAW_BITMAP_CONFIG_WIDTH];
