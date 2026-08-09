@@ -39,7 +39,7 @@ module lcd_page_main_ui #(
                 end
                 
                 'd4: begin
-                    config_data <= make_draw_text_config(lcd_ui_x_t'((LCD_PIXEL_COL_NUM - CHAR_WIDTH * 8) / 2), lcd_ui_y_t'(CHAR_HEIGHT * 2.5), LCD_UI_COLOR_BLACK, lcd_ui_text_data_t'({8'h38, 8'h30, 8'h38, 8'h30, 8'h36, 8'h32, 8'h30, 8'h32}));
+                    config_data <= make_draw_text_config(lcd_ui_x_t'((LCD_PIXEL_COL_NUM - CHAR_WIDTH * 8) / 2), lcd_ui_y_t'(CHAR_HEIGHT * 2.5), LCD_UI_COLOR_BLACK, lcd_ui_text_data_t'({8'h39, 8'h30, 8'h38, 8'h30, 8'h36, 8'h32, 8'h30, 8'h32}));
                 end
 
                 'd5: begin
