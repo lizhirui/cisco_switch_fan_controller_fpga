@@ -38,7 +38,7 @@ module cisco_interface_simulator #(
     )signal_measurer_fan1234_pwm_inst(
         .clk(clk),
         .rst(rst),
-        .signal(cisco_fan1234_pwm),
+        .signal(~cisco_fan1234_pwm),
         .high_level_cnt(fan1234_pwm_high_level_cnt),
         .low_level_cnt(),
         .total_cnt(fan1234_pwm_total_cnt),
@@ -51,7 +51,7 @@ module cisco_interface_simulator #(
     )signal_measurer_fan5678_pwm_inst(
         .clk(clk),
         .rst(rst),
-        .signal(cisco_fan5678_pwm),
+        .signal(~cisco_fan5678_pwm),
         .high_level_cnt(fan5678_pwm_high_level_cnt),
         .low_level_cnt(),
         .total_cnt(fan5678_pwm_total_cnt),

@@ -170,6 +170,7 @@ set_location_assignment PIN_32 -to uart_rxd
 
 set_instance_assignment -name FORCE_SYNCH_CLEAR ON -to lcd_controller_inst|lcd_rom_reader_inst|data[0]
 set_instance_assignment -name FAST_INPUT_REGISTER ON -to lcd_controller_inst|lcd_rom_reader_inst|data[0]
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/multi_pwm_generator.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/page_message_controller.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/lcd_page_message_ui.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/i2c_master_byte.sv

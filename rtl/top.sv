@@ -200,21 +200,18 @@ module top #(
         .main_fan_pwm_duty_ratio(main_fan_pwm_duty_ratio)
     );
     
-    generate
-        for(i = 0;i < MAIN_FAN_NUM;i++) begin: main_fan_pwm_generator_gen
-            pwm_generator #(
-                .FREQ_DIVIDE_WIDTH(FREQ_DIVIDE_WIDTH),
-                .DUTY_RATIO_WIDTH(PWM_DUTY_RATIO_WIDTH),
-                .ASSERT_LEVEL(1'b1)
-            )pwm_generator_inst(
-                .clk(clk),
-                .rst(rst),
-                .freq_divide(CLK_FREQ / 200000),
-                .duty_ratio(main_fan_pwm_duty_ratio[i]),
-                .out(main_fan_pwm[i])  
-            );
-        end
-    endgenerate
+    multi_pwm_generator #(
+        .CLK_FREQ(CLK_FREQ),
+        .PWM_FREQ(200000),
+        .PWM_NUM(MAIN_FAN_NUM),
+        .DUTY_RATIO_WIDTH(PWM_DUTY_RATIO_WIDTH),
+        .ASSERT_LEVEL(1'b0)
+    )multi_pwm_generator_inst(
+        .clk(clk),
+        .rst(rst),
+        .duty_ratio(main_fan_pwm_duty_ratio),
+        .out(main_fan_pwm)
+    );
     
     multi_fan_rpm_measurer #(
         .CLK_FREQ(CLK_FREQ),
@@ -359,6 +356,7 @@ module top #(
         .DATA_WIDTH(REG_DATA_WIDTH),
         .LCD_BRIGHT_WIDTH(LCD_BRIGHT_WIDTH),
         .PWM_DUTY_RATIO_WIDTH(PWM_DUTY_RATIO_WIDTH),
+        .RPM_WIDTH(RPM_WIDTH),
         .MAIN_FAN_NUM(MAIN_FAN_NUM)
     )register_controller_inst(
         .clk(clk),
@@ -370,6 +368,11 @@ module top #(
         .main_fan_pwm_duty_ratio_wdata(main_fan_pwm_duty_ratio_reg_wdata),
         .main_fan_pwm_duty_ratio_we(main_fan_pwm_duty_ratio_reg_we),
         .main_fan_pwm_duty_ratio_rdata(main_fan_pwm_duty_ratio),
+        .main_fan_rpm(main_fan_rpm),
+        .cisco_fan1234_pwm_duty_ratio(cisco_fan1234_pwm_duty_ratio),
+        .cisco_fan5678_pwm_duty_ratio(cisco_fan5678_pwm_duty_ratio),
+        .cisco_fan1234_rpm(cisco_fan1234_rpm),
+        .cisco_fan5678_rpm(cisco_fan5678_rpm),
         .bright_wdata(bright_in),
         .bright_we(bright_in_valid),
         .bright_rdata(bright),
@@ -501,7 +504,9 @@ module top #(
         .LCD_PIXEL_LINE_NUM(LCD_PIXEL_LINE_NUM),
         .LCD_PIXEL_COL_NUM(LCD_PIXEL_COL_NUM),
         .CHAR_WIDTH(CHAR_WIDTH),
-        .CHAR_HEIGHT(CHAR_HEIGHT)
+        .CHAR_HEIGHT(CHAR_HEIGHT),
+        .PWM_DUTY_RATIO_WIDTH(PWM_DUTY_RATIO_WIDTH),
+        .RPM_WIDTH(RPM_WIDTH)
     )lcd_page_cisco_inst(
         .clk(clk),
         .rst(rst),
